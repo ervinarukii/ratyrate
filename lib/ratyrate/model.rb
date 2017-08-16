@@ -2,13 +2,17 @@ require 'active_support/concern'
 module Ratyrate
   extend ActiveSupport::Concern
 
-  def rate(stars, user, dimension=nil, dirichlet_method=false)
+  def rate(stars, user, dimension=nil, dirichlet_method=false, custom_field=nil, custom_field_value=nil)
     dimension = nil if dimension.blank?
 
     if can_rate? user, dimension
       rates(dimension).create! do |r|
         r.stars = stars
         r.rater = user
+        
+        if custom_field.present? && custom_field_value.present?
+          eval("r.#{custom_field}") = custom_field_value 
+        end
       end
       if dirichlet_method
         update_rate_average_dirichlet(stars, dimension)
