@@ -6,14 +6,14 @@ module Ratyrate
     dimension = nil if dimension.blank?
 
     if can_rate? user, dimension
-      rates(dimension).create! do |r|
-        r.stars = stars
-        r.rater = user
-        
-        if custom_field.present? && custom_field_value.present?
-          eval("r.#{custom_field}") = custom_field_value 
-        end
+      attributes = { stars: stars, rater: user }
+
+      if custom_field.present? && custom_field_value.present?
+        attributes.merge!({ custom_field => custom_field_value })
       end
+
+      rates(dimension).create!(attributes)
+
       if dirichlet_method
         update_rate_average_dirichlet(stars, dimension)
       else
